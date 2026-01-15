@@ -22,18 +22,22 @@ DWORD mapSharedFilePermToWindowsPerm(size_t perms) {
     return p;
 }
 
-void* createFile(const char* path, win32::fs::FileCreatePerms perms, win32::fs::FileAttributes attributes, DWORD if_already_exists) {
+std::shared_ptr<void> createFile(const char* path, win32::fs::FileCreatePerms perms, win32::fs::FileAttributes attributes, DWORD if_already_exists) {
     if (!path) {
         lastError = "[FS:W] createFile: (!path) Recieved null pointer to path";
-        return 0x0;
+        return std::shared_ptr<void>(0x0);
     }
     HANDLE handle = CreateFileA(path, mapFilePermToWindowsPerm(perms), mapSharedFilePermToWindowsPerm(perms), NULL, if_already_exists, attributes, NULL);
     if (handle == INVALID_HANDLE_VALUE || !handle) {
-        char msg[4096]{0};
+        static char msg[4096]{0};
         sprintf(msg, "[FS:W] createFile: (!handle||...) CreateFileA() returned an invalid handle (#%llu)", (size_t)GetLastError());
         lastError = msg;
     }
 
-    return handle;
+    return std::shared_ptr<void>(handle, [](void* h){
+        if (h && h != INVALID_HANDLE_VALUE) {
+            CloseHandle(h);
+        }
+    });
 }
  

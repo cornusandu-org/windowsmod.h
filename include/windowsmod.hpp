@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <windows.h>
+#include <memory>
 
 namespace win32 { namespace fs {
     using FileCreatePerms = size_t;
@@ -87,5 +88,7 @@ extern "C" const char* const getLastError();
 void closeHandle(HKEY *handle);
 void cleanupHandles();
 
-void* createFile(const char* path, win32::fs::FileCreatePerms perms, win32::fs::FileAttributes attributes, DWORD if_already_exists = 0);
- 
+std::shared_ptr<void> createFile(const char* path, win32::fs::FileCreatePerms perms, win32::fs::FileAttributes attributes, DWORD if_already_exists = win32::fs::OPEN_ALWAYS);
+size_t getFileSize(const char* path);
+size_t getFileSizeFromHandle(std::shared_ptr<void> handle);
+char fileExists(const char* path);

@@ -17,7 +17,7 @@
                 "${workspaceFolder}/**"
             ],
             "defines": [],
-            "compilerPath": "x86_64-w64-mingw32-gcc",
+            "compilerPath": "x86_64-w64-mingw32-g++",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-clang-x64"
