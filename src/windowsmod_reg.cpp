@@ -1,4 +1,5 @@
-#include "../include/windowsmod.h"
+#include "../include/windowsmod.hpp"
+#include "error.hpp"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,14 +11,14 @@ struct hkeyCloseDataAtExit {
     char inUse;
 };
 
-char* lastError = '\0';
+
 
 struct hkeyCloseDataAtExit *hkeyCloseDataAtExitList = NULL;
 size_t hkeyCloseDataAtExitListSize = 0;
 size_t hkeyCloseDataAtExitListIndex = 0;
 
 void windowsmod_init() {
-    hkeyCloseDataAtExitList = malloc(4 * sizeof(struct hkeyCloseDataAtExit));
+    hkeyCloseDataAtExitList = (hkeyCloseDataAtExit*)malloc(4 * sizeof(struct hkeyCloseDataAtExit));
     hkeyCloseDataAtExitListSize = 4;
 }
 
@@ -28,7 +29,7 @@ void hkeyCloseDataAtExitList_append(HKEY key, char inUse) {
     } else {
         size_t old_size = hkeyCloseDataAtExitListSize;
         hkeyCloseDataAtExitListSize += 4;
-        struct hkeyCloseDataAtExit *newHkeyCloseDataAtExitList = malloc(hkeyCloseDataAtExitListSize * sizeof(struct hkeyCloseDataAtExit));
+        struct hkeyCloseDataAtExit *newHkeyCloseDataAtExitList = (hkeyCloseDataAtExit*)malloc(hkeyCloseDataAtExitListSize * sizeof(struct hkeyCloseDataAtExit));
         memcpy(newHkeyCloseDataAtExitList, hkeyCloseDataAtExitList, old_size * sizeof(struct hkeyCloseDataAtExit));
         free(hkeyCloseDataAtExitList);
         hkeyCloseDataAtExitList = newHkeyCloseDataAtExitList;
@@ -38,7 +39,7 @@ void hkeyCloseDataAtExitList_append(HKEY key, char inUse) {
 }
 
 HKEY *queryRegistry(const char* query, HKEY *parent) {
-    HKEY *hKey = malloc(sizeof(HKEY));
+    HKEY *hKey = (HKEY*)malloc(sizeof(HKEY));
     if (!hKey) return 0x0;
     if (RegOpenKeyExA(parent != NULL ? *parent : HKEY_CURRENT_USER,
                       query,
@@ -73,7 +74,7 @@ struct readValueFromRegistryOutput readValueFromRegistry(HKEY hKey, const char* 
         // 3. Query the value again to get the data
         result = RegQueryValueExA(hKey, query, NULL, &dwType, (LPBYTE)buffer, &cbData);
         if (result == ERROR_SUCCESS) {
-            char* data = malloc(cbData+1);
+            char* data = (char*)malloc(cbData+1);
             memcpy(data, buffer, cbData);
             return (struct readValueFromRegistryOutput){.data = data, .err=0};
         } else {
@@ -87,7 +88,7 @@ struct readValueFromRegistryOutput readValueFromRegistry(HKEY hKey, const char* 
         if (result == ERROR_SUCCESS) {
             char buffer[4096*4];
             sprintf(buffer, "%llu", (size_t)_data);
-            char* data = malloc(strlen(buffer)+1);
+            char* data = (char*)malloc(strlen(buffer)+1);
             memcpy(data, buffer, strlen(buffer) + 1);
             return (struct readValueFromRegistryOutput){.data = data, .err=0};
         } else {
@@ -101,7 +102,7 @@ struct readValueFromRegistryOutput readValueFromRegistry(HKEY hKey, const char* 
         if (result == ERROR_SUCCESS) {
             char buffer[4096*4];
             sprintf(buffer, "%llu", (size_t)_data);
-            char* data = malloc(strlen(buffer)+1);
+            char* data = (char*)malloc(strlen(buffer)+1);
             memcpy(data, buffer, strlen(buffer) + 1);
             return (struct readValueFromRegistryOutput){.data = data, .err=0};
         } else {
@@ -138,7 +139,7 @@ char existsInRegistry(const char* query, HKEY *parent) {
 }
 
 HKEY *createRegistryEntry(const char* query, HKEY *parent) {
-    HKEY *outKey = malloc(sizeof(HKEY));
+    HKEY *outKey = (HKEY*)malloc(sizeof(HKEY));
 
     LONG result = RegCreateKeyExA(
         parent ? *parent : HKEY_CURRENT_USER,                  // defaults to HKEY_CURRENT_USER
@@ -222,7 +223,7 @@ void cleanupHandles() {
     }
     size_t index = 0;
 
-    struct hkeyCloseDataAtExit *newlist = malloc(sizeof(struct hkeyCloseDataAtExit) * ((hkeyCloseDataAtExitListIndex - freedSize) ? (hkeyCloseDataAtExitListIndex - freedSize) : 4));
+    struct hkeyCloseDataAtExit *newlist = (hkeyCloseDataAtExit*)malloc(sizeof(struct hkeyCloseDataAtExit) * ((hkeyCloseDataAtExitListIndex - freedSize) ? (hkeyCloseDataAtExitListIndex - freedSize) : 4));
     if (!newlist) {
         return;
     }
@@ -239,7 +240,4 @@ void cleanupHandles() {
     hkeyCloseDataAtExitListSize = index ? index : 4;
     hkeyCloseDataAtExitListIndex = index;
 }
-
-const char* const getLastError() {
-    return lastError;
-}
+ 

@@ -1,13 +1,29 @@
 # for linux (binaries will run on windows). you can adapt for windows if you want.
-CC=x86_64-w64-mingw32-gcc
-CFLAGS= -O1 -Wall -fstack-protector-strong -fno-delete-null-pointer-checks -Wtrampolines -Wshadow -Werror=return-type -Werror=unused-function
+CC=x86_64-w64-mingw32-g++
+CFLAGS= -O1 -Wall -fstack-protector-strong -fno-delete-null-pointer-checks -Wtrampolines -Wshadow -Werror=return-type -Werror=unused-function -Wno-write-strings
 
 .PHONY: all, clean
 
 all: windowsmod.dll
 	@echo "+ Build complete!"
 
-windowsmod.dll:	./src/windowsmod.c ./include/windowsmod.h
-	@echo "/ Building windowsmod.c -> windowsmod.dll"
-	@$(CC) $(CFLAGS) ./src/windowsmod.c -shared -o ./windowsmod.dll
-	@echo "+ Built windowsmod.c -> windowsmod.dll"
+windowsmod.dll:	./file.o ./reg.o ./err.o ./Makefile
+	@echo "/ Building .o -> windowsmod.dll"
+	@$(CC) $(CFLAGS) ./file.o ./reg.o ./err.o -shared -o ./windowsmod.dll
+	@echo "+ Built .o -> windowsmod.dll"
+
+file.o: ./src/windowsmod_file.cpp ./include/windowsmod.hpp ./Makefile
+	@echo "/ Building windowsmod_file.cpp -> file.o"
+	@$(CC) $(CFLAGS) ./src/windowsmod_file.cpp -c -o ./file.o
+	@echo "+ Built windowsmod_file.cpp -> file.o"
+
+reg.o: ./src/windowsmod_reg.cpp ./include/windowsmod.hpp ./Makefile
+	@echo "/ Building windowsmod_reg.cpp -> reg.o"
+	@$(CC) $(CFLAGS) ./src/windowsmod_reg.cpp -c -o ./reg.o
+	@echo "+ Built windowsmod_reg.cpp -> reg.o"
+
+err.o: ./src/error.cpp ./include/windowsmod.hpp ./Makefile
+	@echo "/ Building error.cpp -> err.o"
+	@$(CC) $(CFLAGS) ./src/error.cpp -c -o ./err.o
+	@echo "+ Built error.cpp -> err.o"
+ 
