@@ -17,7 +17,7 @@ struct hkeyCloseDataAtExit *hkeyCloseDataAtExitList = NULL;
 size_t hkeyCloseDataAtExitListSize = 0;
 size_t hkeyCloseDataAtExitListIndex = 0;
 
-void windowsmod_init() {
+void _windowsmod_reg_init() {
     hkeyCloseDataAtExitList = (hkeyCloseDataAtExit*)malloc(4 * sizeof(struct hkeyCloseDataAtExit));
     hkeyCloseDataAtExitListSize = 4;
 }

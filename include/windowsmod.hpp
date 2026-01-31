@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <memory>
 
+extern void windowsmod_init();  // MUST BE CALLED AT THE START OF THE PROGRAM
+
 namespace win32 { namespace fs {
     using FileCreatePerms = size_t;
     using FileAttributes = size_t;
@@ -70,25 +72,23 @@ namespace win32 { namespace fs {
     static const constexpr DWORD OPEN_ALWAYS = _FILEEXISTS_OPEN_ALWAYS;
 }}
 
-void windowsmod_init();  // MUST BE CALLED AT THE START OF THE PROGRAM
-
 struct readValueFromRegistryOutput {char* data; size_t err;};
 
-HKEY* queryRegistry(const char* query, HKEY *parent);
-struct readValueFromRegistryOutput readValueFromRegistry(HKEY handle, const char* query);
-char existsInRegistry(const char* query, HKEY *parent);
+extern HKEY* queryRegistry(const char* query, HKEY *parent);
+extern struct readValueFromRegistryOutput readValueFromRegistry(HKEY handle, const char* query);
+extern char existsInRegistry(const char* query, HKEY *parent);
 
-HKEY *createRegistryEntry(const char* query, HKEY *parent);
-size_t set_string_value(const char* const query, const char* const value, HKEY *parent);
-size_t set_64int_value(const char* const query, const int64_t value, HKEY *parent);
-size_t set_32int_value(const char* const query, const DWORD value, HKEY *parent);
+extern HKEY *createRegistryEntry(const char* query, HKEY *parent);
+extern size_t set_string_value(const char* const query, const char* const value, HKEY *parent);
+extern size_t set_64int_value(const char* const query, const int64_t value, HKEY *parent);
+extern size_t set_32int_value(const char* const query, const DWORD value, HKEY *parent);
 
 extern "C" const char* const getLastError();
 
-void closeHandle(HKEY *handle);
-void cleanupHandles();
+extern void closeHandle(HKEY *handle);
+extern void cleanupHandles();
 
-std::shared_ptr<void> createFile(const char* path, win32::fs::FileCreatePerms perms, win32::fs::FileAttributes attributes, DWORD if_already_exists = win32::fs::OPEN_ALWAYS);
-size_t getFileSize(const char* path);
-size_t getFileSizeFromHandle(std::shared_ptr<void> handle);
-char fileExists(const char* path);
+extern std::shared_ptr<void> createFile(const char* path, win32::fs::FileCreatePerms perms, win32::fs::FileAttributes attributes, DWORD if_already_exists = win32::fs::OPEN_ALWAYS);
+extern size_t getFileSize(const char* path);
+extern size_t getFileSizeFromHandle(std::shared_ptr<void> handle);
+extern char fileExists(const char* path);
